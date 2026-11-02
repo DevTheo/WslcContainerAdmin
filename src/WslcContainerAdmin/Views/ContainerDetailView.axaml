@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             x:Class="WslcContainerAdmin.Views.ContainerDetailView"
+             x:DataType="vm:ContainerDetailViewModel">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+      <Button Grid.Column="0" Content="← Containers" Command="{Binding BackCommand}" VerticalAlignment="Center" Margin="0,0,14,0" />
+      <StackPanel Grid.Column="1" Spacing="4">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <TextBlock Text="{Binding Container.Name}" Classes="pageTitle" />
+          <Border Background="{DynamicResource SelectedBrush}" CornerRadius="12" Padding="10,4" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Container.State}" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+          </Border>
+        </StackPanel>
+        <TextBlock Text="Container details and live diagnostics" Classes="pageSubtitle" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+        <Button Content="Terminal" Command="{Binding OpenTerminalCommand}" ToolTip.Tip="Open an interactive shell in Windows Terminal" />
+        <Button Content="Start" Command="{Binding StartCommand}" />
+        <Button Content="Stop" Command="{Binding StopCommand}" />
+        <Button Content="Remove" Command="{Binding RemoveCommand}" />
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Margin="2,0,0,10" />
+
+    <TabControl Grid.Row="2" Background="{DynamicResource WindowBrush}" Foreground="{DynamicResource TextPrimaryBrush}">
+      <TabItem Header="Overview">
+        <Border Classes="panel" Margin="0,12,0,0">
+          <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="IMAGE" Classes="tableHeader" VerticalAlignment="Center" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Container.Image}" TextWrapping="Wrap" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="CONTAINER ID" Classes="tableHeader" VerticalAlignment="Center" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Container.Id}" Classes="muted" TextWrapping="Wrap" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="COMMAND" Classes="tableHeader" VerticalAlignment="Center" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Container.Command}" TextWrapping="Wrap" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="CREATED" Classes="tableHeader" VerticalAlignment="Center" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Container.CreatedAt}" Classes="muted" Margin="0,0,0,16" />
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="PORTS / NETWORKS" Classes="tableHeader" VerticalAlignment="Top" />
+            <StackPanel Grid.Row="4" Grid.Column="1" Spacing="8">
+              <TextBlock Text="{Binding Container.Ports}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding Container.Networks}" Classes="muted" TextWrapping="Wrap" />
+            </StackPanel>
+          </Grid>
+        </Border>
+      </TabItem>
+      <TabItem Header="Inspect">
+        <TextBox Text="{Binding InspectJson}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" FontFamily="Consolas" Margin="0,12,0,0" />
+      </TabItem>
+      <TabItem Header="Logs">
+        <Border Classes="panel" Margin="0,12,0,0" Padding="10">
+          <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding LogLines}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}" FontFamily="Consolas" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" Margin="4,3" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Border>
+      </TabItem>
+      <TabItem Header="Stats">
+        <TextBox Text="{Binding StatsJson}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" FontFamily="Consolas" Margin="0,12,0,0" />
+      </TabItem>
+    </TabControl>
+  </Grid>
+</UserControl>

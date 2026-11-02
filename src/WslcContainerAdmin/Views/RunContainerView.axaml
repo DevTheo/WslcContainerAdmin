@@ -1,0 +1,221 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             xmlns:models="using:WslcContainerAdmin.Models"
+             x:Class="WslcContainerAdmin.Views.RunContainerView"
+             x:DataType="vm:RunContainerViewModel">
+  <Grid RowDefinitions="Auto,*,Auto">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Run a container" Classes="pageTitle" />
+        <TextBlock Text="Choose an image, map ports, then configure supported WSLc options" Classes="pageSubtitle" />
+      </StackPanel>
+      <Border Grid.Column="1" Background="{DynamicResource SelectedBrush}" CornerRadius="14" Padding="12,6" VerticalAlignment="Center">
+        <TextBlock Text="{Binding CurrentStep, StringFormat='STEP {0} OF 2'}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+      </Border>
+    </Grid>
+
+    <ScrollViewer Grid.Row="1">
+      <StackPanel Spacing="12">
+        <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding StatusMessage}" Classes="muted" TextWrapping="Wrap" />
+
+        <Border Classes="panel" IsVisible="{Binding IsSetupStep}">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Container name (optional)" FontWeight="SemiBold" />
+            <TextBox Text="{Binding ContainerName}" Watermark="Generated if blank" />
+            <TextBlock Text="Image" Classes="sectionTitle" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <ComboBox Width="420" ItemsSource="{Binding AvailableImages}" SelectedItem="{Binding SelectedImage}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="models:ImageInfo">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                      <TextBlock Text="{Binding Repository}" />
+                      <TextBlock Text=":" />
+                      <TextBlock Text="{Binding Tag}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <Button Content="Use selected" Command="{Binding UseSelectedImageCommand}" />
+            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Grid.Column="0" Text="{Binding ImageName}" Watermark="Image name, e.g. docker.io/library/alpine:latest" Margin="0,0,8,0" />
+              <Button Grid.Column="1" Content="Pull image" Classes="primary" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" BorderBrush="{DynamicResource AccentBrush}" Command="{Binding PullImageCommand}" />
+            </Grid>
+            <ProgressBar IsIndeterminate="True" Width="120" IsVisible="{Binding IsLoading}" />
+          </StackPanel>
+        </Border>
+
+        <Border Classes="panel" IsVisible="{Binding IsSetupStep}">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Port mappings" Classes="sectionTitle" />
+            <ItemsControl ItemsSource="{Binding PortMappings}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:PortMappingItem">
+                  <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2">
+                    <TextBox Width="125" Text="{Binding HostPort}" Watermark="Host port" />
+                    <TextBlock Text="→" VerticalAlignment="Center" Classes="muted" />
+                    <TextBox Width="145" Text="{Binding ContainerPort}" Watermark="Container port" />
+                    <Button x:CompileBindings="False" Content="Remove" Command="{Binding $parent[ItemsControl].DataContext.RemovePortMappingCommand}" CommandParameter="{Binding}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Content="Add port mapping" Command="{Binding AddPortMappingCommand}" HorizontalAlignment="Left" />
+            <TextBlock Text="Image ports detected by WSLc" IsVisible="{Binding HasImageExposedPorts}" Classes="muted" />
+            <ItemsControl ItemsSource="{Binding ImageExposedPorts}" IsVisible="{Binding HasImageExposedPorts}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:Int32">
+                  <Button x:CompileBindings="False" Content="{Binding}" Command="{Binding $parent[ItemsControl].DataContext.AddExposedPortMappingCommand}" CommandParameter="{Binding}" HorizontalAlignment="Left" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <StackPanel IsVisible="{Binding IsSetupStep}" Spacing="8">
+          <TextBlock Text="Advanced container settings" Classes="sectionTitle" />
+          <TabControl MinHeight="400">
+            <TabItem Header="Commands &amp; Logging">
+              <Border Classes="panel" Margin="0,8,0,0">
+                <Grid ColumnDefinitions="*,*">
+                  <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,16,0">
+                    <TextBlock Text="Command" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding Command}" Watermark="Image default" />
+                    <TextBlock Text="Entrypoint override" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding Entrypoint}" Watermark="Image default" />
+                    <TextBlock Text="Working directory" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding WorkingDirectory}" Watermark="Image default" />
+                    <TextBlock Text="User" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding UserName}" Watermark="Image default" />
+                    <TextBlock Text="Console" FontWeight="SemiBold" />
+                    <ComboBox ItemsSource="{Binding ConsoleModes}" SelectedItem="{Binding ConsoleMode}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Spacing="8">
+                    <TextBlock Text="Arguments, one per line" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding Arguments}" AcceptsReturn="True" Height="260" Watermark="-c&#10;echo hello" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </TabItem>
+            <TabItem Header="Volumes">
+              <Border Classes="panel" Margin="0,8,0,0">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Mount a named volume at a container path" Classes="muted" />
+                  <ItemsControl ItemsSource="{Binding VolumeMounts}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:VolumeMountItem">
+                        <Grid ColumnDefinitions="*,220,Auto" Margin="0,2">
+                          <ComboBox x:CompileBindings="False" Grid.Column="0" ItemsSource="{Binding $parent[ItemsControl].DataContext.AvailableVolumes}" SelectedItem="{Binding SelectedVolume}" Margin="0,0,8,0">
+                            <ComboBox.ItemTemplate>
+                              <DataTemplate x:DataType="models:VolumeInfo"><TextBlock Text="{Binding Name}" /></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                          </ComboBox>
+                          <TextBox Grid.Column="1" Text="{Binding ContainerPath}" Watermark="Container path, e.g. /data" Margin="0,0,8,0" />
+                          <Button x:CompileBindings="False" Grid.Column="2" Content="Remove" Command="{Binding $parent[ItemsControl].DataContext.RemoveVolumeMountCommand}" CommandParameter="{Binding}" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <Button Content="Add volume" Command="{Binding AddVolumeMountCommand}" HorizontalAlignment="Left" />
+                </StackPanel>
+              </Border>
+            </TabItem>
+            <TabItem Header="Network">
+              <Border Classes="panel" Margin="0,8,0,0">
+                <Grid ColumnDefinitions="*,*">
+                  <StackPanel Grid.Column="0" Spacing="8" Margin="0,0,16,0">
+                    <TextBlock Text="Network" FontWeight="SemiBold" />
+                    <ComboBox ItemsSource="{Binding AvailableNetworks}" SelectedItem="{Binding SelectedNetwork}">
+                      <ComboBox.ItemTemplate><DataTemplate x:DataType="models:NetworkInfo"><TextBlock Text="{Binding Name}" /></DataTemplate></ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Text="Hostname" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding Hostname}" />
+                    <TextBlock Text="IPv4 address" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding Ipv4Address}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Spacing="8">
+                    <TextBlock Text="Domain name" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding DomainName}" />
+                    <TextBlock Text="DNS servers, one per line" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding DnsServers}" AcceptsReturn="True" Height="110" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </TabItem>
+            <TabItem Header="Env">
+              <Border Classes="panel" Margin="0,8,0,0">
+                <StackPanel Spacing="8" MaxWidth="760" HorizontalAlignment="Left">
+                  <TextBlock Text="Environment variables, one KEY=VALUE per line" FontWeight="SemiBold" />
+                  <TextBox Text="{Binding EnvironmentVariables}" AcceptsReturn="True" Height="120" Watermark="ASPNETCORE_ENVIRONMENT=Production" />
+                  <TextBlock Text="Load variables from .env file" FontWeight="SemiBold" />
+                  <TextBox Text="{Binding EnvironmentFile}" Watermark="Path to .env file (passed to wslc --env-file)" />
+                </StackPanel>
+              </Border>
+            </TabItem>
+            <TabItem Header="Labels">
+              <Border Classes="panel" Margin="0,8,0,0">
+                <StackPanel Spacing="8" MaxWidth="760" HorizontalAlignment="Left">
+                  <TextBlock Text="Labels, one KEY=VALUE per line" Classes="muted" />
+                  <TextBox Text="{Binding Labels}" AcceptsReturn="True" Height="140" Watermark="com.example.owner=team" />
+                </StackPanel>
+              </Border>
+            </TabItem>
+            <TabItem Header="Runtime &amp; resources">
+              <Border Classes="panel" Margin="0,8,0,0">
+                <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto,Auto">
+                  <CheckBox Grid.Row="0" Grid.Column="0" Content="Run in background" IsChecked="{Binding RunInBackground}" Margin="0,0,12,16" />
+                  <CheckBox Grid.Row="0" Grid.Column="1" Content="Remove when it exits" IsChecked="{Binding RemoveOnExit}" Margin="0,0,12,16" />
+                  <CheckBox Grid.Row="0" Grid.Column="2" Content="Pass all GPUs" IsChecked="{Binding PassAllGpus}" Margin="0,0,12,16" />
+                  <StackPanel Grid.Row="1" Grid.Column="0" Spacing="8" Margin="0,0,12,16">
+                    <TextBlock Text="Memory limit" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding MemoryLimit}" Watermark="e.g. 512M" />
+                  </StackPanel>
+                  <StackPanel Grid.Row="1" Grid.Column="1" Spacing="8" Margin="0,0,12,16">
+                    <TextBlock Text="Maximum CPU usage" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding CpuLimit}" Watermark="e.g. 1.5 CPUs" />
+                  </StackPanel>
+                  <StackPanel Grid.Row="1" Grid.Column="2" Spacing="8" Margin="0,0,12,16">
+                    <TextBlock Text="Shared memory size" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding SharedMemorySize}" Watermark="e.g. 64M" />
+                  </StackPanel>
+                  <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Spacing="8">
+                    <TextBlock Text="Stop timeout (seconds)" FontWeight="SemiBold" />
+                    <TextBox Text="{Binding StopTimeoutSeconds}" Watermark="Default; -1 means no timeout" MaxLength="8" />
+                    <TextBlock Text="Leave limits blank to use WSLc defaults." Classes="muted" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </TabItem>
+          </TabControl>
+        </StackPanel>
+
+        <Border Classes="panel" IsVisible="{Binding IsReviewStep}">
+          <StackPanel Spacing="6" MaxWidth="760" HorizontalAlignment="Left">
+            <TextBlock Text="Review configuration" Classes="sectionTitle" />
+            <TextBlock Text="{Binding ContainerName, StringFormat='Container name: {0}'}" Classes="muted" />
+            <TextBlock Text="{Binding ImageName}" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding PortMappings.Count, StringFormat='Ports: {0}'}" Classes="muted" />
+            <TextBlock Text="{Binding Command, StringFormat='Command: {0}'}" Classes="muted" />
+            <TextBlock Text="{Binding Entrypoint, StringFormat='Entrypoint: {0}'}" Classes="muted" />
+            <TextBlock Text="{Binding SelectedNetwork.Name, StringFormat='Network: {0}'}" Classes="muted" />
+            <TextBlock Text="{Binding EnvironmentVariables, StringFormat='Environment: {0}'}" Classes="muted" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding RunInBackground, StringFormat='Run in background: {0}'}" Classes="muted" />
+            <TextBlock Text="{Binding RemoveOnExit, StringFormat='Remove when it exits: {0}'}" Classes="muted" />
+            <TextBlock Text="{Binding StopTimeoutSummary, StringFormat='Stop timeout: {0}'}" Classes="muted" />
+            <TextBlock Text="Launch creates a container using the selected WSLc options." Classes="muted" Margin="0,8,0,0" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+      <ProgressBar IsIndeterminate="True" Width="92" Height="4" IsVisible="{Binding IsLoading}" VerticalAlignment="Center" />
+      <Button Content="Cancel" Command="{Binding CancelCommand}" />
+      <Button Content="Next" Classes="primary" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" BorderBrush="{DynamicResource AccentBrush}" Command="{Binding NextCommand}" IsVisible="{Binding IsSetupStep}" />
+      <Button Content="Previous" Command="{Binding PreviousCommand}" IsVisible="{Binding IsReviewStep}" />
+      <Button Content="Launch" Classes="primary" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" BorderBrush="{DynamicResource AccentBrush}" Command="{Binding LaunchCommand}" IsVisible="{Binding IsReviewStep}" />
+    </StackPanel>
+  </Grid>
+</UserControl>

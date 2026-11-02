@@ -1,0 +1,88 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:WslcContainerAdmin.ViewModels"
+        xmlns:models="using:WslcContainerAdmin.Models"
+        xmlns:views="using:WslcContainerAdmin.Views"
+        x:Class="WslcContainerAdmin.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Wslc Container Admin"
+        Width="1200" Height="800"
+        MinWidth="900" MinHeight="600"
+        WindowState="Maximized"
+        Background="{DynamicResource WindowBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}">
+
+  <Grid ColumnDefinitions="240,*" RowDefinitions="*,30" Background="{DynamicResource WindowBrush}">
+    <Border Grid.RowSpan="2" Grid.Column="0" Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="Auto,*,Auto">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="12" Margin="18,22,18,20">
+          <Border Width="38" Height="38" CornerRadius="8" Background="{DynamicResource AccentBrush}">
+            <TextBlock Text="W" Foreground="{DynamicResource AccentTextBrush}" FontSize="21" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <StackPanel VerticalAlignment="Center" Spacing="2">
+            <TextBlock Text="Wslc Container Admin" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBlock Text="CONTAINER ADMIN" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" />
+          </StackPanel>
+        </StackPanel>
+
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding NavigationItems}"
+                 SelectedItem="{Binding SelectedNavigationItem}"
+                 Margin="10,0">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="models:NavigationItem">
+              <TextBlock Text="{Binding Title}" Padding="8,5" Foreground="{DynamicResource TextPrimaryBrush}" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1,1,0,0" Padding="16,14">
+          <StackPanel Spacing="3">
+            <TextBlock Text="LOCAL WSLc" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" />
+            <TextBlock Text="Managed through wslc.exe" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+
+    <ContentControl Grid.Row="0" Grid.Column="1"
+                    Content="{Binding CurrentViewModel}"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    Margin="28,24,28,20">
+      <ContentControl.DataTemplates>
+        <DataTemplate x:DataType="vm:ContainersViewModel">
+          <views:ContainersView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:ContainerDetailViewModel">
+          <views:ContainerDetailView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:RunContainerViewModel">
+          <views:RunContainerView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:ImagesViewModel">
+          <views:ImagesView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:ImageDetailViewModel">
+          <views:ImageDetailView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:VolumesViewModel">
+          <views:VolumesView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:VolumeDetailViewModel">
+          <views:VolumeDetailView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:NetworksViewModel">
+          <views:NetworksView />
+        </DataTemplate>
+        <DataTemplate x:DataType="vm:NetworkDetailViewModel">
+          <views:NetworkDetailView />
+        </DataTemplate>
+      </ContentControl.DataTemplates>
+    </ContentControl>
+
+    <Border Grid.Row="1" Grid.Column="1" Background="{DynamicResource SidebarBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="16,5">
+      <TextBlock Text="Wslc Container Admin  ·  Local session" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+    </Border>
+  </Grid>
+</Window>

@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             xmlns:models="using:WslcContainerAdmin.Models"
+             x:Class="WslcContainerAdmin.Views.ImagesView"
+             x:DataType="vm:ImagesViewModel">
+  <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,18">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Images" Classes="pageTitle" />
+        <TextBlock Text="Browse and manage images available to WSLc" Classes="pageSubtitle" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <ProgressBar IsIndeterminate="True" Width="92" Height="4" IsVisible="{Binding IsLoading}" />
+        <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+        <Button Content="Details" Command="{Binding OpenDetailsCommand}" />
+      </StackPanel>
+    </Grid>
+
+    <Border Grid.Row="1" Classes="panel" Padding="12" Margin="0,0,0,10">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+        <TextBox Grid.Column="0" Watermark="Image name, e.g. docker.io/library/alpine:latest" Text="{Binding ImageName}" Margin="0,0,8,0" />
+        <Button Grid.Column="1" Content="Pull" Classes="primary" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" BorderBrush="{DynamicResource AccentBrush}" Command="{Binding PullCommand}" Margin="0,0,8,0" />
+        <Button Grid.Column="2" Content="Run selected" Command="{Binding RunSelectedCommand}" Margin="0,0,8,0" />
+        <Button Grid.Column="3" Content="Remove" Command="{Binding RemoveSelectedCommand}" />
+      </Grid>
+    </Border>
+
+    <StackPanel Grid.Row="2" Spacing="4" Margin="2,0,0,10">
+      <TextBlock Text="{Binding StatusMessage}" Classes="muted" TextWrapping="Wrap" />
+      <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <Border Grid.Row="3" Classes="panel" Padding="0">
+      <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="135,*,90,140,90,90" Margin="18,14,18,10">
+          <TextBlock Grid.Column="0" Text="IMAGE ID" Classes="tableHeader" />
+          <TextBlock Grid.Column="1" Text="REPOSITORY:TAG" Classes="tableHeader" />
+          <TextBlock Grid.Column="2" Text="SIZE" Classes="tableHeader" />
+          <TextBlock Grid.Column="3" Text="CREATED" Classes="tableHeader" />
+          <TextBlock Grid.Column="4" Text="CONTAINERS" Classes="tableHeader" />
+          <TextBlock Grid.Column="5" Text="USAGE" Classes="tableHeader" />
+        </Grid>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedImage}" Margin="8,0,8,8">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="models:ImageInfo">
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="10,12">
+                <Grid ColumnDefinitions="135,*,90,140,90,90" VerticalAlignment="Center">
+                  <TextBlock Grid.Column="0" Text="{Binding Id}" Classes="muted" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Repository}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text=":" Classes="muted" />
+                    <TextBlock Text="{Binding Tag}" Classes="muted" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="2" Text="{Binding Size}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="3" Text="{Binding CreatedSince}" Classes="muted" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="4" Text="{Binding Containers}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="5" Text="{Binding UsageStatus}" Classes="muted" VerticalAlignment="Center" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

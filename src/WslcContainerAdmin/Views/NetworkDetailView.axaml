@@ -1,0 +1,101 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             xmlns:models="using:WslcContainerAdmin.Models"
+             x:Class="WslcContainerAdmin.Views.NetworkDetailView"
+             x:DataType="vm:NetworkDetailViewModel">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+      <Button Grid.Column="0" Content="← Networks" Command="{Binding BackCommand}" Margin="0,0,14,0" />
+      <StackPanel Grid.Column="1" Spacing="4">
+        <TextBlock Text="{Binding Details.Name}" Classes="pageTitle" />
+        <TextBlock Text="Network details" Classes="pageSubtitle" />
+      </StackPanel>
+      <Button Grid.Column="2" Content="Refresh" Command="{Binding RefreshCommand}" />
+    </Grid>
+    <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Margin="2,0,0,10" />
+    <ScrollViewer Grid.Row="2">
+      <StackPanel Spacing="12">
+        <Border Classes="panel">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Network details" Classes="sectionTitle" />
+            <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+              <TextBlock Grid.Row="0" Text="NETWORK ID" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Details.Id}" TextWrapping="Wrap" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="1" Text="DRIVER" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Details.Driver}" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="2" Text="SCOPE" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Details.Scope}" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="3" Text="ATTACHABLE" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Details.Attachable}" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="4" Text="INTERNAL" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Details.Internal}" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="5" Text="IPv4 ENABLED" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Details.IPv4Enabled}" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="6" Text="IPv6 ENABLED" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding Details.IPv6Enabled}" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="7" Text="IPAM DRIVER" Classes="tableHeader" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Details.IpamDriver}" Margin="0,0,0,10" />
+              <TextBlock Grid.Row="8" Text="CREATED" Classes="tableHeader" />
+              <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding Details.CreatedAt}" />
+            </Grid>
+          </StackPanel>
+        </Border>
+        <Border Classes="panel">
+          <StackPanel Spacing="8">
+            <TextBlock Text="IPAM configuration" Classes="sectionTitle" />
+            <ItemsControl ItemsSource="{Binding Details.IpamConfigs}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:NetworkIpamConfig">
+                  <Grid ColumnDefinitions="90,*,90,*,90,*" Margin="0,3">
+                    <TextBlock Grid.Column="0" Text="Subnet" Classes="tableHeader" />
+                    <TextBlock Grid.Column="1" Text="{Binding Subnet}" TextWrapping="Wrap" />
+                    <TextBlock Grid.Column="2" Text="Gateway" Classes="tableHeader" />
+                    <TextBlock Grid.Column="3" Text="{Binding Gateway}" TextWrapping="Wrap" />
+                    <TextBlock Grid.Column="4" Text="IP range" Classes="tableHeader" IsVisible="{Binding HasIpRange}" />
+                    <TextBlock Grid.Column="5" Text="{Binding IpRange}" TextWrapping="Wrap" IsVisible="{Binding HasIpRange}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <Border Classes="panel">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Network options" Classes="sectionTitle" />
+            <ItemsControl ItemsSource="{Binding Details.Options}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid ColumnDefinitions="*,*" Margin="0,3">
+                    <TextBlock Grid.Column="0" Text="{Binding Key}" Classes="muted" />
+                    <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <Border Classes="panel">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Containers in this network" Classes="sectionTitle" />
+            <TextBlock Text="No container endpoints were returned by WSLc." Classes="muted" IsVisible="{Binding HasNoContainers}" />
+            <ItemsControl ItemsSource="{Binding Details.Containers}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:NetworkEndpoint">
+                  <Grid ColumnDefinitions="*,150,150,160,Auto,Auto" Margin="0,3">
+                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding IPv4Address}" Classes="muted" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding IPv6Address}" Classes="muted" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="{Binding MacAddress}" Classes="muted" VerticalAlignment="Center" />
+                    <Button x:CompileBindings="False" Grid.Column="4" Content="Details" Command="{Binding $parent[ItemsControl].DataContext.OpenContainerDetailsCommand}" CommandParameter="{Binding}" IsEnabled="{Binding CanOpenDetails}" />
+                    <Button x:CompileBindings="False" Grid.Column="5" Content="Disconnect" Command="{Binding $parent[ItemsControl].DataContext.DisconnectCommand}" CommandParameter="{Binding}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

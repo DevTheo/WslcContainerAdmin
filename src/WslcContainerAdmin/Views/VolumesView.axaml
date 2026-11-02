@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             xmlns:models="using:WslcContainerAdmin.Models"
+             x:Class="WslcContainerAdmin.Views.VolumesView"
+             x:DataType="vm:VolumesViewModel">
+  <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,18">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Volumes" Classes="pageTitle" />
+        <TextBlock Text="Manage persistent data used by containers" Classes="pageSubtitle" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <ProgressBar IsIndeterminate="True" Width="92" Height="4" IsVisible="{Binding IsLoading}" />
+        <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+        <Button Content="Details" Command="{Binding OpenDetailsCommand}" />
+        <Button Content="Remove selected" Command="{Binding RemoveSelectedCommand}" />
+      </StackPanel>
+    </Grid>
+
+    <Border Grid.Row="1" Classes="panel" Padding="12" Margin="0,0,0,10">
+      <Grid ColumnDefinitions="*,180,Auto">
+        <TextBox Grid.Column="0" Watermark="New volume name" Text="{Binding NewVolumeName}" Margin="0,0,8,0" />
+        <TextBox Grid.Column="1" Watermark="Driver" Text="{Binding NewVolumeDriver}" Margin="0,0,8,0" />
+        <Button Grid.Column="2" Content="Create volume" Classes="primary" Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource AccentTextBrush}" BorderBrush="{DynamicResource AccentBrush}" Command="{Binding CreateCommand}" />
+      </Grid>
+    </Border>
+
+    <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Margin="2,0,0,10" />
+
+    <Border Grid.Row="3" Classes="panel" Padding="0">
+      <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="190,120,100,*,100" Margin="18,14,18,10">
+          <TextBlock Grid.Column="0" Text="NAME" Classes="tableHeader" />
+          <TextBlock Grid.Column="1" Text="DRIVER" Classes="tableHeader" />
+          <TextBlock Grid.Column="2" Text="SCOPE" Classes="tableHeader" />
+          <TextBlock Grid.Column="3" Text="MOUNTPOINT" Classes="tableHeader" />
+          <TextBlock Grid.Column="4" Text="USAGE" Classes="tableHeader" />
+        </Grid>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Volumes}" SelectedItem="{Binding SelectedVolume}" Margin="8,0,8,8">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="models:VolumeInfo">
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="10,12">
+                <Grid ColumnDefinitions="190,120,100,*,100" VerticalAlignment="Center">
+                  <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="1" Text="{Binding Driver}" Classes="muted" />
+                  <TextBlock Grid.Column="2" Text="{Binding Scope}" Classes="muted" />
+                  <TextBlock Grid.Column="3" Text="{Binding Mountpoint}" Classes="muted" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="4" Text="{Binding UsageStatus}" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

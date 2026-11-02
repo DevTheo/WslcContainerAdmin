@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             xmlns:models="using:WslcContainerAdmin.Models"
+             x:Class="WslcContainerAdmin.Views.VolumeDetailView"
+             x:DataType="vm:VolumeDetailViewModel">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+      <Button Grid.Column="0" Content="← Volumes" Command="{Binding BackCommand}" Margin="0,0,14,0" />
+      <StackPanel Grid.Column="1" Spacing="4">
+        <TextBlock Text="{Binding Volume.Name}" Classes="pageTitle" />
+        <TextBlock Text="Volume details" Classes="pageSubtitle" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+        <Button Content="Delete volume" Command="{Binding RemoveCommand}" IsEnabled="{Binding CanDelete}" />
+      </StackPanel>
+    </Grid>
+    <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Margin="2,0,0,10" />
+    <ScrollViewer Grid.Row="2">
+      <StackPanel Spacing="12">
+        <Border Classes="panel">
+          <StackPanel Spacing="12">
+            <TextBlock Text="Volume details" Classes="sectionTitle" />
+            <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto">
+              <TextBlock Grid.Row="0" Text="CREATED DATE" Classes="tableHeader" Margin="0,0,0,12" />
+              <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Volume.CreatedAt}" Margin="0,0,0,12" />
+              <TextBlock Grid.Row="1" Text="MOUNT PATH" Classes="tableHeader" Margin="0,0,0,12" />
+              <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Volume.Mountpoint}" TextWrapping="Wrap" Margin="0,0,0,12" />
+              <TextBlock Grid.Row="2" Text="DRIVER" Classes="tableHeader" Margin="0,0,0,12" />
+              <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Volume.Driver}" Margin="0,0,0,12" />
+              <TextBlock Grid.Row="3" Text="SCOPE" Classes="tableHeader" />
+              <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Volume.Scope}" />
+            </Grid>
+          </StackPanel>
+        </Border>
+        <Border Classes="panel">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Containers using this volume" Classes="sectionTitle" />
+            <TextBlock Text="No containers are using this volume." IsVisible="{Binding Volume.IsUnused}" Classes="muted" />
+            <ItemsControl ItemsSource="{Binding Volume.UsingContainers}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:ContainerInfo">
+                  <Grid ColumnDefinitions="*,120,Auto" Margin="0,3">
+                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding State}" Classes="muted" VerticalAlignment="Center" />
+                    <Button x:CompileBindings="False" Grid.Column="2" Content="Details" Command="{Binding $parent[ItemsControl].DataContext.OpenContainerDetailsCommand}" CommandParameter="{Binding}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

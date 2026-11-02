@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             x:Class="WslcContainerAdmin.Views.ImageDetailView"
+             x:DataType="vm:ImageDetailViewModel">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,12">
+      <Button Grid.Column="0" Content="← Images" Command="{Binding BackCommand}" VerticalAlignment="Center" Margin="0,0,14,0" />
+      <StackPanel Grid.Column="1" Spacing="4">
+        <TextBlock Text="{Binding Image.Repository}" Classes="pageTitle" />
+        <TextBlock Text="Image details" Classes="pageSubtitle" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <TextBlock Text="{Binding Image.Tag}" Classes="muted" VerticalAlignment="Center" />
+      </StackPanel>
+    </Grid>
+    <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Margin="2,0,0,10" />
+    <ScrollViewer Grid.Row="2">
+      <StackPanel Spacing="12">
+        <Border Classes="panel">
+          <Grid ColumnDefinitions="150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Text="IMAGE ID" Classes="tableHeader" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Image.Id}" TextWrapping="Wrap" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="1" Text="SIZE" Classes="tableHeader" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Image.Size}" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="2" Text="CREATED" Classes="tableHeader" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Created}" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="3" Text="PLATFORM" Classes="tableHeader" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Platform}" Margin="0,0,0,10" />
+            <TextBlock Grid.Row="4" Text="CONTAINERS" Classes="tableHeader" />
+            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Image.Containers}" />
+          </Grid>
+        </Border>
+        <Border Classes="panel">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Image configuration" Classes="sectionTitle" />
+            <ItemsControl ItemsSource="{Binding Configuration}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ImageDetailRow">
+                  <Grid ColumnDefinitions="170,*" Margin="0,4">
+                    <TextBlock Grid.Column="0" Text="{Binding Name}" Classes="tableHeader" VerticalAlignment="Top" />
+                    <TextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" FontFamily="Consolas" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <Border Classes="panel">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Layer digests" Classes="sectionTitle" />
+            <TextBlock Text="WSLc inspect exposes layer digests, but not per-layer build commands or sizes." Classes="muted" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding LayerDigests}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" Margin="0,2" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

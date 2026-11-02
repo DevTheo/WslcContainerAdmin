@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:WslcContainerAdmin.ViewModels"
+             xmlns:models="using:WslcContainerAdmin.Models"
+             x:Class="WslcContainerAdmin.Views.NetworksView"
+             x:DataType="vm:NetworksViewModel">
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,18">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Networks" Classes="pageTitle" />
+        <TextBlock Text="Inspect networks available to WSLc containers" Classes="pageSubtitle" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+        <ProgressBar IsIndeterminate="True" Width="92" Height="4" IsVisible="{Binding IsLoading}" />
+        <Button Content="Refresh" Command="{Binding RefreshCommand}" />
+        <Button Content="Details" Command="{Binding OpenDetailsCommand}" />
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" Margin="2,0,0,10" />
+
+    <Border Grid.Row="2" Classes="panel" Padding="0">
+      <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="145,100,90,130,65,65,85,*" Margin="18,14,18,10">
+          <TextBlock Grid.Column="0" Text="NAME" Classes="tableHeader" />
+          <TextBlock Grid.Column="1" Text="DRIVER" Classes="tableHeader" />
+          <TextBlock Grid.Column="2" Text="SCOPE" Classes="tableHeader" />
+          <TextBlock Grid.Column="3" Text="ID" Classes="tableHeader" />
+          <TextBlock Grid.Column="4" Text="IPV4" Classes="tableHeader" />
+          <TextBlock Grid.Column="5" Text="IPV6" Classes="tableHeader" />
+          <TextBlock Grid.Column="6" Text="INTERNAL" Classes="tableHeader" />
+          <TextBlock Grid.Column="7" Text="CREATED" Classes="tableHeader" />
+        </Grid>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Networks}" SelectedItem="{Binding SelectedNetwork}" Margin="8,0,8,8">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="models:NetworkInfo">
+              <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="10,12">
+                <Grid ColumnDefinitions="145,100,90,130,65,65,85,*" VerticalAlignment="Center">
+                  <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="1" Text="{Binding Driver}" Classes="muted" />
+                  <TextBlock Grid.Column="2" Text="{Binding Scope}" Classes="muted" />
+                  <TextBlock Grid.Column="3" Text="{Binding Id}" Classes="muted" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="4" Text="{Binding IPv4}" />
+                  <TextBlock Grid.Column="5" Text="{Binding IPv6}" />
+                  <TextBlock Grid.Column="6" Text="{Binding Internal}" />
+                  <TextBlock Grid.Column="7" Text="{Binding CreatedAt}" Classes="muted" TextTrimming="CharacterEllipsis" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>
