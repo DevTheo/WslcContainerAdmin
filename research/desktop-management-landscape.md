@@ -118,6 +118,14 @@ The user reports that `wslc image ls` lists installed images and returns image I
 - Decision: build an app-level "basic" Compose module above the `wslc` CLI and grow it, rather than waiting for Microsoft's native `wslc compose`. Native compose remains roadmap-only.
 - The WSL Container Desktop reference proves the approach but is GPL-3.0, so we adapt its architecture (parse with MIT `YamlDotNet`, own Compose semantics) without copying code or assets.
 - v1 boundary and handoff are in `research/compose-module-plan.md`.
+
+## Container auto-start preference (2026-11-04)
+
+- The user wants selected containers started when the desktop app opens, with an optional Windows sign-in launch setting.
+- The app stores selected WSLc container IDs in `%LOCALAPPDATA%\WslcContainerAdmin\settings.json`; WSLc remains the source of truth for current running state.
+- On the first container refresh per app run, the app lists all containers, starts selected stopped containers, and drops stale IDs for containers no longer present. Windows sign-in launch uses the current user's Run registry key.
+- This is app-triggered startup behavior, not a WSLc restart policy; containers are not restarted after the app's one startup reconciliation if they later stop.
+
 ## Useful questions for later discovery
 
 These are research prompts, not decisions or requirements:

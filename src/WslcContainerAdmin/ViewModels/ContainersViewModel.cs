@@ -11,7 +11,8 @@ public partial class ContainersViewModel(
     IWslcContainerService containers,
     INavigationService navigation,
     IServiceProvider services,
-    IConfirmationService confirmation) : ViewModelBase
+    IConfirmationService confirmation,
+    IStartupPreferencesService startupPreferences) : ViewModelBase
 {
     public ObservableCollection<ContainerInfo> Items { get; } = [];
 
@@ -27,6 +28,29 @@ public partial class ContainersViewModel(
     [ObservableProperty]
     private string? _errorMessage;
 
+    [ObservableProperty]
+    private bool _launchAtSignIn = startupPreferences.Current.LaunchAtSignIn;
+
+    private bool _startupContainersProcessed;
+
+    public bool SelectedAutoStartEnabled => SelectedContainer is not null && startupPreferences.Current.AutoStartContainerIds.Contains(SelectedContainer.Id);
+
+    partial void OnSelectedContainerChanged(ContainerInfo? value) => OnPropertyChanged(nameof(SelectedAutoStartEnabled));
+
+    partial void OnLaunchAtSignInChanged(bool value)
+    {
+        try { startupPreferences.SetLaunchAtSignIn(value); }
+        catch (Exception ex) { ErrorMessage = ex.Message; LaunchAtSignIn = !value; }
+    }
+
+    [RelayCommand]
+    private void ToggleSelectedAutoStart()
+    {
+        if (SelectedContainer is not { } selected) return;
+        startupPreferences.SetContainerAutoStart(selected.Id, !SelectedAutoStartEnabled);
+        OnPropertyChanged(nameof(SelectedAutoStartEnabled));
+    }
+
     public override Task OnNavigatedToAsync() => RefreshAsync();
 
     [RelayCommand]
@@ -37,22 +61,29 @@ public partial class ContainersViewModel(
         ErrorMessage = null;
         try
         {
-            var rows = await containers.ListAsync(IncludeStopped);
-            Items.Clear();
-            foreach (var row in rows)
+            var rows = await containers.ListAsync(includeStopped: true);
+            if (!_startupContainersProcessed)
             {
-                Items.Add(row);
+                _startupContainersProcessed = true;
+                var availableIds = rows.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
+                foreach (var staleId in startupPreferences.Current.AutoStartContainerIds.Where(id => !availableIds.Contains(id)).ToArray())
+                {
+                    startupPreferences.SetContainerAutoStart(staleId, enabled: false);
+                }
+                foreach (var row in rows.Where(item => startupPreferences.Current.AutoStartContainerIds.Contains(item.Id) && !string.Equals(item.State, "running", StringComparison.OrdinalIgnoreCase)))
+                {
+                    try { await containers.StartAsync(row.Id); }
+                    catch (Exception ex) { ErrorMessage = $"Could not auto-start '{row.Name}': {ex.Message}"; }
+                }
+                if (startupPreferences.Current.AutoStartContainerIds.Count != 0) rows = await containers.ListAsync(includeStopped: true);
             }
+            var visibleRows = IncludeStopped ? rows : rows.Where(item => string.Equals(item.State, "running", StringComparison.OrdinalIgnoreCase)).ToList();
+            Items.Clear();
+            foreach (var row in visibleRows) Items.Add(row);
             SelectedContainer = Items.FirstOrDefault(item => item.Id == selectedId);
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+        finally { IsLoading = false; }
     }
 
     [RelayCommand]

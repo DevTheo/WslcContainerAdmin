@@ -15,7 +15,7 @@ public sealed class ViewModelTests
     public async Task Containers_refresh_and_actions_use_selected_item()
     {
         var fake = new FakeContainers();
-        var vm = new ContainersViewModel(fake, new NavigationService(), new ServiceCollection().BuildServiceProvider(), new FakeConfirmation(true));
+        var vm = new ContainersViewModel(fake, new NavigationService(), new ServiceCollection().BuildServiceProvider(), new FakeConfirmation(true), new FakeStartupPreferences());
         await vm.RefreshCommand.ExecuteAsync(null);
         Assert.Equal(Container, Assert.Single(vm.Items));
         vm.SelectedContainer = Container;
@@ -24,6 +24,23 @@ public sealed class ViewModelTests
         await vm.StopSelectedCommand.ExecuteAsync(null);
         await vm.RemoveSelectedCommand.ExecuteAsync(null);
         Assert.Equal("id1", Assert.Single(fake.Removed));
+    }
+
+    [Fact]
+    public async Task Containers_start_only_configured_stopped_containers_on_first_refresh()
+    {
+        var fake = new FakeContainers();
+        fake.Rows.Clear();
+        fake.Rows.Add(Container with { State = "exited" });
+        fake.Rows.Add(Container with { Id = "running-id", Name = "already-running", State = "running" });
+        var preferences = new FakeStartupPreferences();
+        preferences.SetContainerAutoStart("id1", true);
+        preferences.SetContainerAutoStart("running-id", true);
+        var vm = new ContainersViewModel(fake, new NavigationService(), new ServiceCollection().BuildServiceProvider(), new FakeConfirmation(false), preferences);
+
+        await vm.RefreshCommand.ExecuteAsync(null);
+
+        Assert.Equal(new[] { "id1" }, fake.Started);
     }
 
     [Fact]
@@ -59,7 +76,7 @@ public sealed class ViewModelTests
         var navigation = new NavigationService();
         var containers = new FakeContainers();
         var services = new ServiceCollection().BuildServiceProvider();
-        var list = new ContainersViewModel(containers, navigation, services, new FakeConfirmation(false));
+        var list = new ContainersViewModel(containers, navigation, services, new FakeConfirmation(false), new FakeStartupPreferences());
         await navigation.NavigateAsync(list);
 
         var detail = new ContainerDetailViewModel(containers, navigation, services, new FakeConfirmation(false));
@@ -258,6 +275,7 @@ public sealed class ViewModelTests
             .AddSingleton<IWslcInventoryService>(inventory)
             .AddSingleton<IWslcImageService>(images)
             .AddSingleton<IConfirmationService>(confirmation)
+            .AddSingleton<IStartupPreferencesService>(new FakeStartupPreferences())
             .AddSingleton<INavigationService>(navigation)
             .AddTransient<ContainersViewModel>()
             .AddTransient<ImagesViewModel>()
@@ -315,12 +333,25 @@ public sealed class ViewModelTests
         public Task RemoveAsync(string id, CancellationToken cancellationToken = default) { Removed = id; return Task.CompletedTask; }
     }
 
+    private sealed class FakeStartupPreferences : IStartupPreferencesService
+    {
+        private readonly HashSet<string> _ids = new(StringComparer.Ordinal);
+        public StartupPreferences Current { get; private set; } = new(false, new HashSet<string>(StringComparer.Ordinal));
+        public void SetContainerAutoStart(string containerId, bool enabled)
+        {
+            if (enabled) _ids.Add(containerId); else _ids.Remove(containerId);
+            Current = Current with { AutoStartContainerIds = new HashSet<string>(_ids, StringComparer.Ordinal) };
+        }
+        public void SetLaunchAtSignIn(bool enabled) => Current = Current with { LaunchAtSignIn = enabled };
+    }
+
     private sealed class FakeContainers : IWslcContainerService
     {
         public List<string> Started { get; } = [];
         public List<string> Removed { get; } = [];
+        public List<ContainerInfo> Rows { get; } = [Container];
         public ContainerRunOptions? LastRun { get; private set; }
-        public Task<IReadOnlyList<ContainerInfo>> ListAsync(bool includeStopped, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<ContainerInfo>>([Container]);
+        public Task<IReadOnlyList<ContainerInfo>> ListAsync(bool includeStopped, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<ContainerInfo>>(Rows.ToList());
         public Task RunAsync(ContainerRunOptions options, CancellationToken cancellationToken = default) { LastRun = options; return Task.CompletedTask; }
         public Task StartAsync(string id, CancellationToken cancellationToken = default) { Started.Add(id); return Task.CompletedTask; }
         public Task StopAsync(string id, CancellationToken cancellationToken = default) => Task.CompletedTask;

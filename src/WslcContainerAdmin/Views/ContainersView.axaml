@@ -20,10 +20,12 @@
     <Border Grid.Row="1" Classes="panel" Padding="12" Margin="0,0,0,12">
       <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
         <CheckBox Content="Include stopped" IsChecked="{Binding IncludeStopped}" VerticalAlignment="Center" />
+        <CheckBox Content="Launch app at sign-in" IsChecked="{Binding LaunchAtSignIn}" VerticalAlignment="Center" />
         <Border Width="1" Height="24" Background="{DynamicResource BorderBrush}" Margin="6,0" />
         <Button Content="Details" Command="{Binding OpenDetailsCommand}" />
         <Button Content="Start" Command="{Binding StartSelectedCommand}" />
         <Button Content="Stop" Command="{Binding StopSelectedCommand}" />
+        <CheckBox Content="Start with app" IsChecked="{Binding SelectedAutoStartEnabled, Mode=OneWay}" Command="{Binding ToggleSelectedAutoStartCommand}" VerticalAlignment="Center" />
         <Button Content="Remove" Command="{Binding RemoveSelectedCommand}" />
       </StackPanel>
     </Border>

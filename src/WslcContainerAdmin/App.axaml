@@ -2,6 +2,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="WslcContainerAdmin.App"
              RequestedThemeVariant="Dark">
+  <TrayIcon.Icons>
+    <TrayIcons>
+      <TrayIcon Icon="/Assets/container-admin-icon.ico" ToolTipText="Wslc Container Admin">
+        <TrayIcon.Menu>
+          <NativeMenu>
+            <NativeMenuItem Header="Open Wslc Container Admin" Click="OnTrayOpenClicked" />
+            <NativeMenuItem Header="Close Wslc Container Admin" Click="OnTrayExitClicked" />
+          </NativeMenu>
+        </TrayIcon.Menu>
+      </TrayIcon>
+    </TrayIcons>
+  </TrayIcon.Icons>
   <Application.Styles>
     <FluentTheme />
     <Style Selector="TextBlock">

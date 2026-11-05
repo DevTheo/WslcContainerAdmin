@@ -4,6 +4,7 @@
         xmlns:models="using:WslcContainerAdmin.Models"
         xmlns:views="using:WslcContainerAdmin.Views"
         x:Class="WslcContainerAdmin.MainWindow"
+        Icon="/Assets/container-admin-icon.ico"
         x:DataType="vm:MainViewModel"
         Title="Wslc Container Admin"
         Width="1200" Height="800"

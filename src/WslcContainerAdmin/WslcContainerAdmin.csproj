@@ -8,6 +8,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>Assets\container-admin-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -26,6 +27,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <!-- Avalonia 11.2.8 brings vulnerable Tmds.DBus.Protocol 0.20.0 transitively; resolve to the patched 0.95.1 line. -->
     <PackageReference Include="Tmds.DBus.Protocol" Version="0.95.1" />
+    <AvaloniaResource Include="Assets\container-admin-icon.ico" />
   </ItemGroup>
 
 </Project>

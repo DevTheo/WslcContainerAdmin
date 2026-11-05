@@ -88,7 +88,7 @@ public sealed class WslcServiceTests
         var expected = new[]
         {
             typeof(IWslcCli), typeof(IWslcInventoryService), typeof(IWslcContainerService),
-            typeof(IWslcImageService), typeof(IConfirmationService), typeof(INavigationService), typeof(IContainerTerminalService), typeof(IResourceDetailsService),
+            typeof(IWslcImageService), typeof(IConfirmationService), typeof(INavigationService), typeof(IContainerTerminalService), typeof(IResourceDetailsService), typeof(IStartupPreferencesService),
             typeof(MainViewModel), typeof(ContainersViewModel), typeof(ContainerDetailViewModel), typeof(VolumeDetailViewModel), typeof(NetworkDetailViewModel),
             typeof(RunContainerViewModel), typeof(ImagesViewModel), typeof(ImageDetailViewModel), typeof(VolumesViewModel), typeof(NetworksViewModel),
         };

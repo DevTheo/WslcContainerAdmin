@@ -15,6 +15,7 @@ public static class WslcContainerAdminServiceCollectionExtensions
         services.AddSingleton<IWslcImageService, WslcImageService>();
         services.AddSingleton<IConfirmationService, AvaloniaConfirmationService>();
         services.AddSingleton<IContainerTerminalService, WindowsTerminalService>();
+        services.AddSingleton<IStartupPreferencesService, StartupPreferencesService>();
         services.AddSingleton<IResourceDetailsService, WslcResourceDetailsService>();
         services.AddTransient<VolumeDetailViewModel>();
         services.AddTransient<MainViewModel>();
